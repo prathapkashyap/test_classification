@@ -1,7 +1,7 @@
-import torch
-import numpy as np
+# import torch
+# import numpy as np
 from torch import nn
-from src.data.data_loader import fetch_traget_names
+# from src.data.data_loader import fetch_target_names
 
 class Classifier(nn.Module):
     def __init__(self, num_classes, embedding_size) -> None:

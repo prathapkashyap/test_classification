@@ -1,9 +1,12 @@
-from models.model import Classifier
-from data.data_loader import fetch_traget_names, fetch_training_labels, fetch_test_labels
+from Text_Style_Embeddings_from_Topic_Models.src.utils.utils import parse_arguments
+from model import Classifier
+from data.data_loader import fetch_target_names, fetch_training_labels, fetch_test_labels
 from torch import nn
 import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
+from pathlib import Path
+
 
 def read_embeddings(file_name):
 
@@ -16,6 +19,7 @@ def create_data_loader(file_name, labels):
     labels_tensors  = torch.tensor(labels[:len(inputs)])
     dataset = TensorDataset(inputs, labels_tensors)
     batch_size = 32
+    print(f"inputs_______:{inputs.shape}")
     train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle= True)
     return train_loader
 
@@ -31,7 +35,7 @@ def train(embeddings_file_name: str,
     train_loader = create_data_loader(file_name=embeddings_file_name, labels= fetch_training_labels())
     for epoch in range(epochs):
         train_model.train() 
-        for input, label in train_loader():
+        for input, label in train_loader:
             y_pred_class = train_model(input)
             loss = loss_fn(y_pred_class, label)
             optimizer.zero_grad()
@@ -62,20 +66,28 @@ def test(model_name: str,
     test_acc = test_acc/len(test_data_loader)
     return test_loss, test_acc
 
+def save_model(model:str, model_file_name: str):
+    torch.save(obj = model.state_dict(), f = model_file_name)
+    # model_path = Path("models")
+    # model_name = "text_classifier_bert.pth"
 
-def main():
+def main(model_name: str):
     print("Main function, train")
-    target_classes = fetch_traget_names()
+    target_classes = fetch_target_names()
     num_classes = len(target_classes)
     model = Classifier(num_classes= num_classes, embedding_size = 512)
     loss = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01)
-    [train_loss, train_acc] = train(embeddings_file_name="bert_train_embeddings.npy", 
+    [train_loss, train_acc] = train(embeddings_file_name=model_name+"_train_embeddings.npy", 
                                 train_model=model,
                                 loss_fn = loss,
                                 optimizer = optimizer)
+    save_model(model= model, model_file_name="classifier_trained_with_"+model_name+"_embeddings.pth" )
     
+
     print(f"train_loss: {train_loss}, train_acc:{train_acc}")
 
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+    model_embeddings_to_use = args.model
+    main(model_name=model_embeddings_to_use)

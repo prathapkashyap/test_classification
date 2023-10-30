@@ -15,7 +15,7 @@ def fetch_testing_data():
     target = newsgroup_train.target
     return{"testing_data": testing_data, "target": target}
     
-def fetch_traget_names():
+def fetch_target_names():
     target_names = newsgroup_train.traget_names
     return target_names
 

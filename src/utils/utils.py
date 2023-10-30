@@ -2,12 +2,12 @@ from pathlib import Path
 import logging
 import argparse
 
-LOGGER_NAME = "logs"
+# LOGGER_NAME = "logs"
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default = "bert")
-
+    # print(parser.parse_args()model)
     return parser.parse_args()
 
 
